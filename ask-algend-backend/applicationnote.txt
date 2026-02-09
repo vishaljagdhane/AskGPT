@@ -1,0 +1,8 @@
+step :Create venv 
+->python -m venv venv
+step 2: active venv
+->.\venv\Scripts\Activate.ps1 
+step 3: insatlled packge
+-> pip install fastapi uvicorn sqlalchemy psycopg2-binary passlib[bcrypt] python-jose python-dotenv
+step :4 ceate .env file 
+step :5 created database connection 
