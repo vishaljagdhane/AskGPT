@@ -9,6 +9,7 @@ import {
   FormControlLabel,
   InputAdornment,
   Stack,
+  Snackbar, Alert
 } from "@mui/material";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -24,12 +25,16 @@ import IconButton from "@mui/material/IconButton";
 import PhoneAndroidIcon from "@mui/icons-material/PhoneAndroid";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import apiServices from "../APIService/apiServices";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function AuthLogin() {
-  const [loginInput, setLoginInput] = useState({
-    username: "",
-    password: "",
-  });
+  const {accountRegister,userAccountLogin} =apiServices()  
+ const [loginInput, setLoginInput] = useState({
+  identifier: "",
+  password: "",
+});
+
   const [showPassword, setShowPassword] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
   const [userRegister,setUserRegister] = useState({
@@ -42,6 +47,13 @@ export default function AuthLogin() {
 
 
 })
+const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState('success'); // 'success' | 'error' | 'info' | 'warning'
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setOpen(false);
+  };
+const navigate = useNavigate();
 
   const goToRegister = () => setIsRegister(true);
   const goToLogin = () => setIsRegister(false);
@@ -63,12 +75,56 @@ export default function AuthLogin() {
     });
   };
   
-  const handelLogin = () => {
-    console.log("Login data:", loginInput);
-  };
-  const handelRegister = () => { 
-    console.log("Register data:", userRegister);
-     }
+// const handelLogin = async () => {
+//   try {
+//     const response = await userAccountLogin(loginInput);
+//     alert(response.message); // "User is successfully logged in"
+//     console.log("Login response:", response);
+//   } catch (error) {
+//     alert("Login failed");
+//     console.log("Error in login:", error);
+//   }
+// };
+const handelLogin = async () => {
+  try {
+    const response = await userAccountLogin(loginInput);
+
+    if (response?.status === "success") {
+      sessionStorage.setItem("user", JSON.stringify(response.user));
+  setStatus("success");
+      setOpen(true); 
+      navigate("/dashboard");
+    } else {
+      alert("Login failed");
+    }
+  } catch (error) {
+setStatus("error");
+    setOpen(true);
+    console.log("Error in login:", error);
+  }
+};
+
+const handelRegister = async ()=>{
+  try{
+const response= await  accountRegister(userRegister)
+// console.log("Register response:", response);
+setStatus("success");
+setOpen(true);
+goToLogin();
+setIsRegister({
+    fname:'',
+    lname:'',
+    mobile:'',
+    email:'',
+    chooiseUsername:'',
+    password:'',
+})
+  }
+  catch(error)
+  {
+
+  }
+}
 
 
   function AnimatedAskGpt() {
@@ -161,7 +217,7 @@ export default function AuthLogin() {
           sx={{
             position: "absolute",
             inset: 0,
-            width: "55%",
+            width: "45%",
             background: "linear-gradient(180deg, #1e7bff 0%, #0d6efd 100%)",
             color: "#fff",
             p: 6,
@@ -244,8 +300,8 @@ export default function AuthLogin() {
 
                 <TextField
                   fullWidth
-                  placeholder="User name"
-                  name="username"
+                 placeholder="Email / Mobile / Username"
+                name="identifier"
                   onChange={handleInputChange}
                   sx={{ mb: 2 }}
                   InputProps={{
@@ -319,7 +375,7 @@ export default function AuthLogin() {
                 </Typography>
               </>
             ) : (
-              /* ================= REGISTER FORM ================= */
+           
               <>
                 <Typography variant="h5" fontWeight="bold">
                   Sign up
@@ -469,6 +525,16 @@ export default function AuthLogin() {
               </>
             )}
           </Box>
+          <Snackbar 
+        open={open} 
+        autoHideDuration={4000} 
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleClose} severity={status} variant="filled" sx={{ width: '100%' }}>
+          {status === 'success' ? 'Data saved successfully!' : 'An error occurred.'}
+        </Alert>
+      </Snackbar>
         </Box>
       </Paper>
     </Box>

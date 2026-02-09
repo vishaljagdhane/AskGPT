@@ -1,19 +1,32 @@
-import logo from './logo.svg';
-import './App.css';
-import { useContext } from 'react';
-import {CommonStateContext} from './Application/Commoncomponet/CommonStateProvider';
-import AuthLogin from './Application/Auth/AuthLogin';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AuthLogin from "./Application/Auth/AuthLogin";
+import ProtectedRoute from "./Application/Auth/ProtectedRoute";
+import ChatboatLandingpage from "./Application/chatboat/ChatboatLandingpage";
+
 
 function App() {
-  // console.log("process.env.REACT_TEST_VARIALE",process.env.REACT_TEST_VARIALE);
-  console.log(process.env.REACT_TEST_VARIALE)
-  const { userName } = useContext(CommonStateContext);
+  const isAuth = sessionStorage.getItem("user");
+
   return (
- <>
- {/* Teted commonContext and ENV variable  <h1>Hello World {userName} </h1>
- <h1>Hello {process.env.REACT_APP_TEST_VARIABLE}</h1> */}
-<AuthLogin/>
- </>
+    <BrowserRouter>
+      <Routes>
+        {/* Login page */}
+        <Route
+          path="/"
+          element={isAuth ? <Navigate to="/dashboard" /> : <AuthLogin />}
+        />
+
+        {/* Protected dashboard */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+             <ChatboatLandingpage/>
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
